@@ -1061,7 +1061,7 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
             for _ in range(config.num_reasoning_types)]) if config.with_reasoning_types else None
         self.reasoning_classifier = torch.nn.Linear(config.hidden_size, config.num_reasoning_types) if config.with_reasoning_types else None
         # Adversarial Training
-        self.domain_classifier = torch.nn.Linear(config.hidden_size * 4, 1) # 4 is num_choice
+        self.domain_classifier = torch.nn.Linear(config.hidden_size * 4, 2) # 4 is num_choice
         self.init_weights()
 
     @add_start_docstrings_to_model_forward(ROBERTA_INPUTS_DOCSTRING.format("batch_size, num_choices, sequence_length"))
