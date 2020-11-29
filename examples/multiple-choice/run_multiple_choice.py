@@ -222,22 +222,22 @@ def main():
         predictions = trainer.predict(eval_dataset)
         
         # Get mcq and reasoning preds, labels, and metrics
-        mcq_preds = np.argmax(predictions.predictions[0], axis=1)
-        reasoning_preds = np.argmax(predictions.predictions[1], axis=1)
-        reasoning_labels = predictions.predictions[2]
-        predictions.metrics['reasoning_classifier_eval_acc'] = simple_accuracy(reasoning_preds, reasoning_labels)
+        mcq_preds = np.argmax(predictions.predictions, axis=1)
+        #reasoning_preds = np.argmax(predictions.predictions[1], axis=1)
+        #reasoning_labels = predictions.predictions[2]
+        #predictions.metrics['reasoning_classifier_eval_acc'] = simple_accuracy(reasoning_preds, reasoning_labels)
         
         # Create result dictionaries to be dumped to output json files
         ids = [feature.example_id for feature in eval_dataset.features]
         mcq_results = {id: pred for id, pred in zip(ids, mcq_preds.tolist())}
-        reasoning_results = {id: reasoning_pred for id, reasoning_pred in zip(ids, reasoning_preds.tolist())}
+        #reasoning_results = {id: reasoning_pred for id, reasoning_pred in zip(ids, reasoning_preds.tolist())}
         
         # Predictions to be used in eval script
         output_preds_file = os.path.join(training_args.output_dir, "preds.json")
         if trainer.is_world_master():
             with open(output_preds_file, 'w', encoding='utf-8') as writer:
                 json.dump(mcq_results, writer, separators=(',', ':'), sort_keys=True, indent=4)
-                
+        '''       
         # Reasoning classifier predictions
         output_reasoning_preds_file = os.path.join(training_args.output_dir, "reasoning_preds.json")
         if trainer.is_world_master():
@@ -249,7 +249,7 @@ def main():
         if trainer.is_world_master():
             with open(output_reasoning_labels_file, 'w', encoding='utf-8') as writer:
                 json.dump(reasoning_labels.tolist(), writer, separators=(',', ':'), sort_keys=True, indent=4)
-
+        '''
         # Write prediction metrics to file
         output_metrics_file = os.path.join(training_args.output_dir, "metrics.json")
         if trainer.is_world_master():
