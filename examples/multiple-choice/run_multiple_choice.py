@@ -65,6 +65,9 @@ class ModelArguments:
     with_reasoning_types: bool = field(
         default=False, metadata={"help": "Utilize reasoning type in the model."}
     )
+    with_adv_training: bool = field(
+        default=False, metadata={"help": "Utilize adversarial training."}
+    )
 
 
 @dataclass
@@ -142,7 +145,8 @@ def main():
         num_labels=num_labels,
         finetuning_task=data_args.task_name,
         cache_dir=model_args.cache_dir,
-        with_reasoning_types=model_args.with_reasoning_types
+        with_reasoning_types=model_args.with_reasoning_types,
+        with_adv_training=model_args.with_adv_training
     )
     tokenizer = AutoTokenizer.from_pretrained(
         model_args.tokenizer_name if model_args.tokenizer_name else model_args.model_name_or_path,
@@ -156,6 +160,8 @@ def main():
     )
 
     # Get datasets
+    # The data consist of both target domain with domain_label = 0 and source domain with domain_label = 1
+    # Read and return domain label as well
     train_dataset = (
         MultipleChoiceDataset(
             data_dir=data_args.data_dir,
@@ -165,6 +171,7 @@ def main():
             overwrite_cache=data_args.overwrite_cache,
             mode=Split.train,
             with_reasoning_types=model_args.with_reasoning_types,
+            with_adv_training=model_args.with_adv_training
         )
         if training_args.do_train
         else None
@@ -177,11 +184,13 @@ def main():
             max_seq_length=data_args.max_seq_length,
             overwrite_cache=data_args.overwrite_cache,
             mode=Split.dev,
-            with_reasoning_types=model_args.with_reasoning_types
+            with_reasoning_types=model_args.with_reasoning_types,
+            with_adv_training=model_args.with_adv_training
         )
         if training_args.do_eval
         else None
     )
+
 
     def compute_metrics(p: EvalPrediction) -> Dict:
         preds = np.argmax(p.predictions[0], axis=1)

@@ -383,6 +383,8 @@ class Trainer:
         signature_columns += ["label", "label_ids"]
         # Add reasoning_label column to signature
         signature_columns += ["reasoning_label"]
+        # Add domain_label column to signature
+        signature_columns += ["domain_label"]
         columns = [k for k in signature_columns if k in dataset.column_names]
         ignored_columns = list(set(dataset.column_names) - set(signature_columns))
         dset_description = "" if description is None else f"in the {description} set "

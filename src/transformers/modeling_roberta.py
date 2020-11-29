@@ -1027,6 +1027,24 @@ class RobertaForSequenceClassification(RobertaPreTrainedModel):
     """,
     ROBERTA_START_DOCSTRING,
 )
+
+
+class GradReverse(torch.autograd.Function):
+    """
+        GRL implementation
+        """
+    @staticmethod
+    def forward(self, x):
+        return x.view_as(x)
+
+    @staticmethod
+    def backward(self, grad_output):
+        return grad_output.neg()
+
+def grad_reverse(x):
+    return GradReverse.apply(x)
+
+
 class RobertaForMultipleChoice(RobertaPreTrainedModel):
     authorized_missing_keys = [r"position_ids"]
 
@@ -1036,11 +1054,14 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
         self.roberta = RobertaModel(config)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.classifier = nn.Linear(config.hidden_size, 1)
+
         self.augmented_classifiers = nn.ModuleList([nn.Linear(config.hidden_size, 1) \
             for _ in range(config.num_reasoning_types)]) if config.with_reasoning_types else None
         self.augmented_batch_norms = nn.ModuleList([nn.BatchNorm1d(config.hidden_size+config.num_reasoning_types) \
             for _ in range(config.num_reasoning_types)]) if config.with_reasoning_types else None
         self.reasoning_classifier = torch.nn.Linear(config.hidden_size, config.num_reasoning_types) if config.with_reasoning_types else None
+        # Adversarial Training
+        self.domain_classifier = torch.nn.Linear(config.hidden_size * 4, 1) # 4 is num_choice
         self.init_weights()
 
     @add_start_docstrings_to_model_forward(ROBERTA_INPUTS_DOCSTRING.format("batch_size, num_choices, sequence_length"))
@@ -1057,6 +1078,7 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
         attention_mask=None,
         labels=None,
         reasoning_label=None,
+        domain_label = None,
         position_ids=None,
         head_mask=None,
         inputs_embeds=None,
@@ -1097,6 +1119,10 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
         
         pooled_output = outputs[1]
         pooled_output = self.dropout(pooled_output)
+        # Add for adversarial training 
+        if self.config.with_adv_training:
+            # Flatten the input
+            domain_logits = self.domain_classifier(grad_reverse(pooled_output.view(-1, pooled_output.shape[0] * num_choices)))
         
         if self.config.with_reasoning_types:
             # Get reasoning logits: RC maps from n_choices x H -> n_choices x n_reasoning_types
@@ -1142,11 +1168,20 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
         reshaped_logits = logits.view(-1, num_choices)
         
         loss = None
-        if labels is not None:
+
+        if labels is not None and not torch.isnan(labels).any():
+            # Loss of the source domain
             loss_fct = CrossEntropyLoss()
+            loss_BCE = torch.nn.BCEWithLogitsLoss()
             loss = loss_fct(reshaped_logits, labels)
+            loss += loss_BCE (domain_logits, domain_label) if self.config.with_adv_training else 0
             loss += loss_fct(reshaped_ensembled_reasoning_logits, reasoning_label) if self.config.with_reasoning_types else 0
-            
+
+        elif labels is not None and torch.isnan(labels).all():
+            # Loss of the target domain
+            loss_BCE = torch.nn.BCEWithLogitsLoss()
+            loss += loss_BCE (domain_logits, domain_label) if self.config.with_adv_training else 0
+
         if not return_dict:
             # Returning the reasoning label in the output is a trick used in order to enable
             # evaluation of our reasoning_classifier passing through the prediction_loop 

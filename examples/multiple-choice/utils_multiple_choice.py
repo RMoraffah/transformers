@@ -48,6 +48,7 @@ class InputExample:
         specified for train and dev examples, but not for test examples.
         reasoning_label: (Optional) string. The reasoning type label for the
         example. Specified for train and dev samples, but not for test samples.
+        domain_label: (Optional) string. The label which specifies which domain the example is coming from.
     """
 
     example_id: str
@@ -56,6 +57,7 @@ class InputExample:
     endings: List[str]
     label: Optional[str]
     reasoning_label: Optional[str]
+    domain_label: Optional[str]
 
 
 @dataclass(frozen=True)
@@ -71,7 +73,7 @@ class InputFeatures:
     token_type_ids: Optional[List[List[int]]]
     label: Optional[int]
     reasoning_label: Optional[int]
-
+    domain_label: Optional[int]
 
 class Split(Enum):
     train = "train"
@@ -100,6 +102,7 @@ if is_torch_available():
             overwrite_cache=False,
             mode: Split = Split.train,
             with_reasoning_types: bool = False,
+            with_adv_training: bool = False,
         ):
             processor = processors[task]()
 
@@ -125,6 +128,8 @@ if is_torch_available():
                     logger.info(f"Creating features from dataset file at {data_dir}")
                     label_list = processor.get_labels()
                     reasoning_label_list = processor.get_reasoning_labels() if with_reasoning_types else None
+                    domain_label_list = processor.get_domain_labels() if with_adv_training else None
+
                     if mode == Split.dev:
                         examples = processor.get_dev_examples(data_dir)
                     elif mode == Split.test:
@@ -136,6 +141,7 @@ if is_torch_available():
                         examples,
                         label_list,
                         reasoning_label_list,
+                        domain_label_list,
                         max_seq_length,
                         tokenizer,
                     )
@@ -261,6 +267,9 @@ class DataProcessor:
         raise NotImplementedError()
         
     def get_reasoning_labels(self):
+        return None
+
+    def get_domain_labels(self):
         return None
 
 
@@ -543,6 +552,9 @@ class QuailProcessor(DataProcessor):
     
     def get_reasoning_labels(self):
         return list(self.reasoning_type_dict.keys())
+
+    def get_domain_labels(self):
+        return ["0", "1"]
     
     def _read_json(self, input_file):
         with open(input_file, "r", encoding="utf-8") as fin:
@@ -563,7 +575,8 @@ class QuailProcessor(DataProcessor):
                          qa_entry["answers"][2],
                          qa_entry["answers"][3]],
                 label=qa_entry["correct_answer_id"],
-                reasoning_label=qa_entry["question_type"]
+                reasoning_label=qa_entry["question_type"],
+                domain_label = qa_entry["domain_type"]
             )
             for qa_entry in [json.loads(line) for line in lines]
         ]
@@ -575,6 +588,7 @@ def convert_examples_to_features(
     examples: List[InputExample],
     label_list: List[str],
     reasoning_label_list: List[str],
+    domain_label_list: List[str],
     max_length: int,
     tokenizer: PreTrainedTokenizer,
 ) -> List[InputFeatures]:
@@ -628,7 +642,9 @@ def convert_examples_to_features(
         
         reasoning_label_map = {reasoning_label: i for i, reasoning_label in enumerate(reasoning_label_list)} if reasoning_label_list != None else None
         reasoning_label = reasoning_label_map[example.reasoning_label] if reasoning_label_map != None else None
-        
+
+        domain_label_map = {domain_label: i for i, domain_label in enumerate(domain_label_list)}
+        domain_label = domain_label_map[example.domain_label]
         features.append(
             InputFeatures(
                 example_id=example.example_id,
@@ -636,7 +652,8 @@ def convert_examples_to_features(
                 attention_mask=attention_mask,
                 token_type_ids=token_type_ids,
                 label=label,
-                reasoning_label=reasoning_label
+                reasoning_label=reasoning_label,
+                domain_label=domain_label
             )
         )
 

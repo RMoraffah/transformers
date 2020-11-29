@@ -66,8 +66,10 @@ class RobertaConfig(BertConfig):
             eos_token_id=2,
             num_reasoning_types=9,
             with_reasoning_types=False,
+            with_adv_training=False,
             **kwargs):
         """Constructs RobertaConfig."""
         super().__init__(pad_token_id=pad_token_id, bos_token_id=bos_token_id, eos_token_id=eos_token_id, **kwargs)
         self.num_reasoning_types = num_reasoning_types
         self.with_reasoning_types = with_reasoning_types
+        self.with_adv_training = with_adv_training
