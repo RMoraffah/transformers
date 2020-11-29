@@ -73,7 +73,7 @@ class InputFeatures:
     token_type_ids: Optional[List[List[int]]]
     label: Optional[int]
     reasoning_label: Optional[int]
-    domain_label: Optional[int]
+    domain_label: Optional[float]
 
 class Split(Enum):
     train = "train"
