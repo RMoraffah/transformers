@@ -1169,13 +1169,13 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
         reshaped_logits = logits.view(-1, num_choices)
         
         loss = None
-            print("--------------domain label----------------")
-            print(domain_label)
-            print("-------------------logit---------------")
-            print(reshaped_logits.shape)
-            print("-------------------label---------------")
-            print(label.shape)
-            print(label)
+        print("--------------domain label----------------")
+        print(domain_label)
+        print("-------------------logit---------------")
+        print(reshaped_logits.shape)
+        print("-------------------label---------------")
+        print(label.shape)
+        print(label)
         if labels is not None and domain_label:
             
             # Loss of the source domain
