@@ -193,7 +193,7 @@ def main():
 
 
     def compute_metrics(p: EvalPrediction) -> Dict:
-        preds = np.argmax(p.predictions[0], axis=1)
+        preds = np.argmax(p.predictions, axis=1)
         return {"acc": simple_accuracy(preds, p.label_ids)}
 
     # Initialize our Trainer
