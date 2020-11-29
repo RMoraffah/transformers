@@ -1175,6 +1175,8 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
             loss_fct = CrossEntropyLoss()
             loss_BCE = torch.nn.BCEWithLogitsLoss()
             loss = loss_fct(reshaped_logits, labels)
+            print("-------------label size---------------")
+            print(domain_label.size)
             loss += loss_BCE (domain_logits, domain_label) if self.config.with_adv_training else 0
             loss += loss_fct(reshaped_ensembled_reasoning_logits, reasoning_label) if self.config.with_reasoning_types else 0
 
