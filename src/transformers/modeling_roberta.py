@@ -1124,7 +1124,7 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
             
             # Flatten the input
             domain_logits = self.domain_classifier(grad_reverse(pooled_output.view(pooled_output.shape[1] * num_choices)))
-            #domain_label = domain_label.type_as(domain_logits)
+            domain_label = domain_label.type_as(domain_logits)
             print("------------------domain_logit-------")
             print(domain_logits.shape)
             print(type(domain_logits.data))
