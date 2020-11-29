@@ -1126,9 +1126,8 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
             print("------------------domain_logit-------")
             print(domain_logits.shape)
             print("------------------pool-------")
-            print(pooled_output.size)
-            print("------------------classfier-------")
-            print(self.domain_classifier)
+            print(domain_label.shape)
+          
         if self.config.with_reasoning_types:
             # Get reasoning logits: RC maps from n_choices x H -> n_choices x n_reasoning_types
             # where H is the size of the hidden pooled_output dim
@@ -1175,6 +1174,7 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
         loss = None
         print("--------------domain label----------------")
         print(domain_label)
+        print(domain_label.shape)
         print("-------------------logit---------------")
         print(reshaped_logits.shape)
         print("-------------------label---------------")
