@@ -1123,6 +1123,7 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
         if self.config.with_adv_training:
             # Flatten the input
             domain_logits = self.domain_classifier(grad_reverse(pooled_output.view(-1, pooled_output.shape[1] * num_choices)))
+            print(domain_logits.shape)
         
         if self.config.with_reasoning_types:
             # Get reasoning logits: RC maps from n_choices x H -> n_choices x n_reasoning_types
