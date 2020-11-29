@@ -1121,6 +1121,7 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
         pooled_output = self.dropout(pooled_output)
         # Add for adversarial training 
         if self.config.with_adv_training:
+            domain_label = domain_label.type_as(torch.float)
             # Flatten the input
             domain_logits = self.domain_classifier(grad_reverse(pooled_output.view(pooled_output.shape[1] * num_choices)))
             print("------------------domain_logit-------")
