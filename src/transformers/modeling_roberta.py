@@ -1203,7 +1203,7 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
             print(type(loss_BCE (domain_logits, domain_label)))
             print(loss_BCE (domain_logits, domain_label))
             print(type(loss))
-            loss += loss_BCE (domain_logits, domain_label) if self.config.with_adv_training else 0
+            loss = loss_BCE (domain_logits, domain_label) if self.config.with_adv_training else 0
 
         if not return_dict:
             # Returning the reasoning label in the output is a trick used in order to enable
