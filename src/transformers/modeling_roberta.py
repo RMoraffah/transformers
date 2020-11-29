@@ -1126,7 +1126,7 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
             print("------------------domain_logit-------")
             print(domain_logits.shape)
             print("------------------pool-------")
-            print(pooled_output)
+            print(pooled_output.size)
             print("------------------classfier-------")
             print(self.domain_classifier)
         if self.config.with_reasoning_types:
