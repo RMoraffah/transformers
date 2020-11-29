@@ -1193,7 +1193,7 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
         elif labels is not None and not domain_label:
             # Loss of the target domain
             loss_BCE = torch.nn.BCEWithLogitsLoss()
-            loss += loss_BCE (domain_logits, long(domain_label)) if self.config.with_adv_training else 0
+            loss += loss_BCE (domain_logits, domain_label) if self.config.with_adv_training else 0
 
         if not return_dict:
             # Returning the reasoning label in the output is a trick used in order to enable
