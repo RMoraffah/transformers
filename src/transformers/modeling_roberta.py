@@ -1124,7 +1124,7 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
             
             # Flatten the input
             domain_logits = self.domain_classifier(grad_reverse(pooled_output.view(pooled_output.shape[1] * num_choices)))
-            domain_label = domain_label.type_as(domain_logits)
+            #domain_label = domain_label.type_as(domain_logits)
             print("------------------domain_logit-------")
             print(domain_logits.shape)
             print(type(domain_logits.data))
@@ -1191,13 +1191,16 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
             loss_fct = CrossEntropyLoss()
             loss_BCE = torch.nn.BCEWithLogitsLoss()
             loss = loss_fct(reshaped_logits, labels)
-            
+            print("----------------loss type")
+            print(type(loss_BCE (domain_logits, domain_label)))
             loss += loss_BCE (domain_logits, domain_label) if self.config.with_adv_training else 0
             loss += loss_fct(reshaped_ensembled_reasoning_logits, reasoning_label) if self.config.with_reasoning_types else 0
 
         elif labels is not None and not domain_label:
             # Loss of the target domain
             loss_BCE = torch.nn.BCEWithLogitsLoss()
+            print("----------------loss type")
+            print(type(loss_BCE (domain_logits, domain_label)))
             loss += loss_BCE (domain_logits, domain_label) if self.config.with_adv_training else 0
 
         if not return_dict:
