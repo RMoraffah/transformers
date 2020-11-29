@@ -1174,8 +1174,8 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
         print("-------------------logit---------------")
         print(reshaped_logits.shape)
         print("-------------------label---------------")
-        print(label.shape)
-        print(label)
+        print(labels.shape)
+        print(labels)
         if labels is not None and domain_label:
             
             # Loss of the source domain
