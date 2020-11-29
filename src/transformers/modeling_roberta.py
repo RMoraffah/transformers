@@ -1122,7 +1122,11 @@ class RobertaForMultipleChoice(RobertaPreTrainedModel):
         # Add for adversarial training 
         if self.config.with_adv_training:
             # Flatten the input
-            domain_logits = self.domain_classifier(grad_reverse(pooled_output.view(-1, pooled_output.shape[0] * num_choices)))
+            print("pooled output")
+            print(pooled_output.shape)
+            print("domain classifier")
+            print(domain_classifier)
+            domain_logits = self.domain_classifier(grad_reverse(pooled_output.view(-1, pooled_output.shape[1] * num_choices)))
         
         if self.config.with_reasoning_types:
             # Get reasoning logits: RC maps from n_choices x H -> n_choices x n_reasoning_types
