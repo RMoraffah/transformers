@@ -1041,7 +1041,7 @@ class GradReverse(torch.autograd.Function):
 
     @staticmethod
     def backward(self, grad_output):
-        return (grad_output.neg() * self.alpha)
+        return (grad_output.neg() * self.alpha), None
 
 def grad_reverse(x, alpha):
     return GradReverse.apply(x, alpha)
