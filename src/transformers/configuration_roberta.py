@@ -74,4 +74,4 @@ class RobertaConfig(BertConfig):
         self.num_reasoning_types = num_reasoning_types
         self.with_reasoning_types = with_reasoning_types
         self.with_adv_training = with_adv_training
-        seelf.alpha = alpha
+        self.alpha = alpha
