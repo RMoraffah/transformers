@@ -1038,8 +1038,8 @@ class GradReverse(torch.autograd.Function):
         return x.view_as(x)
 
     @staticmethod
-    def backward(self, grad_output, alpha):
-        return (grad_output * -alpha)
+    def backward(self, grad_output):
+        return (grad_output * -self.config.alpha)
 
 def grad_reverse(x):
     return GradReverse.apply(x)
