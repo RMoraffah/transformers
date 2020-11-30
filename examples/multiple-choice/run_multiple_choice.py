@@ -68,6 +68,9 @@ class ModelArguments:
     with_adv_training: bool = field(
         default=False, metadata={"help": "Utilize adversarial training."}
     )
+    alpha: float = field(
+        default=1, metadata={"help": "Hyperparameter of GRL."}
+    )
 
 
 @dataclass
@@ -146,7 +149,8 @@ def main():
         finetuning_task=data_args.task_name,
         cache_dir=model_args.cache_dir,
         with_reasoning_types=model_args.with_reasoning_types,
-        with_adv_training=model_args.with_adv_training
+        with_adv_training=model_args.with_adv_training,
+        alpha=model_args.alpha
     )
     tokenizer = AutoTokenizer.from_pretrained(
         model_args.tokenizer_name if model_args.tokenizer_name else model_args.model_name_or_path,
