@@ -1033,6 +1033,7 @@ class GradReverse(torch.autograd.Function):
     """
         GRL implementation
         """
+    @staticmethod
     def __init__(self, alpha):
         self.lambd = alpha
         
